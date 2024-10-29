@@ -1,0 +1,24 @@
+{
+  "name": "@matrica/oauth-sdk",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/matricaOAuthClient.js",
+  "types": "dist/matricaOAuthClient.d.ts",
+  "scripts": {
+    "test": "jest",
+    "build": "tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/jest": "^27.0.0",
+    "jest": "^27.0.0",
+    "ts-jest": "^27.0.0",
+    "typescript": "^4.0.0"
+  }
+}
