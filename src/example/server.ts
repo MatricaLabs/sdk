@@ -1,16 +1,18 @@
 import express from 'express';
-import { MatricaOAuthClient } from './matricaOAuthClient';
+import { MatricaOAuthClient } from '../matricaOAuthClient';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const app = express();
 
 // Store for code verifiers and user sessions
 const codeVerifiers: Record<string, string> = {};
-const userSessions: Record<string, any> = {}; // You might want to store these in a database instead
+const userSessions: Record<string, any> = {}; // in memory storage for sessions, should be replaced with a database
 
 const client = new MatricaOAuthClient({
-  clientId: 'acf6b1eb7f87b8a',
-  redirectUri: 'http://localhost:3000/callback',
-  clientSecret: 'OGXgKiKy-f-KW04eHSxmpAtTWZmFiB',
+  clientId: process.env.MATRICA_CLIENT_ID!,
+  clientSecret: process.env.MATRICA_CLIENT_SECRET!,
+  redirectUri: process.env.MATRICA_REDIRECT_URI!,
   environment: 'development',
 });
 
