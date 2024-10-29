@@ -114,6 +114,12 @@ interface WalletToken {
   amount: number;
 }
 
+interface OAuthCredential {
+  name: string;
+  externalId: string;
+  externalName: string;
+}
+
 class UserSession {
   private tokens?: TokenResponse;
   private tokenExpiresAt?: Date;
@@ -193,6 +199,22 @@ class UserSession {
 
   async getUserTokens(): Promise<WalletToken[]> {
     return this.makeAuthenticatedRequest<WalletToken[]>('/tokens');
+  }
+
+  async getUserTwitter(): Promise<OAuthCredential | null> {
+    return this.makeAuthenticatedRequest<OAuthCredential>('/twitter');
+  }
+
+  async getUserDiscord(): Promise<OAuthCredential | null> {
+    return this.makeAuthenticatedRequest<OAuthCredential>('/discord');
+  }
+
+  async getUserTelegram(): Promise<OAuthCredential | null> {
+    return this.makeAuthenticatedRequest<OAuthCredential>('/telegram');
+  }
+
+  async getUserSocial(platform: 'twitter' | 'discord' | 'telegram'): Promise<OAuthCredential | null> {
+    return this.makeAuthenticatedRequest<OAuthCredential>(`/${platform}`);
   }
 
   private async makeAuthenticatedRequest<T>(path: string): Promise<T> {

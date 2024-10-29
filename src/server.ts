@@ -37,29 +37,36 @@ app.get('/callback', async (req, res) => {
     // Create a new user session
     const userSession = await client.createSession(code, codeVerifier);
     
-    // Store the session (you might want to use a database in production)
+    // Store the session
     userSessions[state] = userSession;
 
     // Clean up code verifier
     delete codeVerifiers[state];
 
-    // Example of using the session to get user data
-    const profile = await userSession.getUserProfile();
+    // Get all user data to test
+    const [profile, wallets, twitter, discord, telegram] = await Promise.all([
+      userSession.getUserProfile(),
+      userSession.getUserWallets(),
+      userSession.getUserTwitter(),
+      userSession.getUserDiscord(),
+      userSession.getUserTelegram()
+    ]);
+
     console.log('User profile:', profile);
-
-    const wallets = await userSession.getUserWallets();
     console.log('User wallets:', wallets);
-
-    const nfts = await userSession.getUserNFTs();
-    console.log('User nfts:', nfts);
-
-    const tokens = await userSession.getUserTokens();
-    console.log('User tokens:', tokens);
+    console.log('Twitter auth:', twitter);
+    console.log('Discord auth:', discord);
+    console.log('Telegram auth:', telegram);
 
     res.json({ 
       message: 'Authentication successful',
       userId: profile.id,
-      wallets: wallets.map(w => w.id)
+      wallets: wallets.map(w => w.id),
+      socials: {
+        twitter,
+        discord,
+        telegram
+      }
     });
   } catch (error) {
     console.error('Error in callback:', error);
@@ -94,6 +101,75 @@ app.get('/user/:stateId/wallets', async (req, res) => {
     res.json(wallets);
   } catch (error) {
     console.error('Error getting wallets:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Helper function to reduce duplication
+const createSocialEndpoint = (platform: string) => {
+  app.get(`/user/:stateId/${platform}`, async (req, res) => {
+    try {
+      const userSession = userSessions[req.params.stateId];
+      if (!userSession) {
+        return res.status(401).json({ error: 'No session found' });
+      }
+
+      const social = await userSession[`getUser${platform.charAt(0).toUpperCase() + platform.slice(1)}`]();
+      res.json(social);
+    } catch (error) {
+      console.error(`Error getting ${platform} credentials:`, error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+};
+
+// Create endpoints for each social platform
+createSocialEndpoint('twitter');
+createSocialEndpoint('discord');
+createSocialEndpoint('telegram');
+
+// Or if you prefer explicit endpoints:
+app.get('/user/:stateId/twitter', async (req, res) => {
+  try {
+    const userSession = userSessions[req.params.stateId];
+    if (!userSession) {
+      return res.status(401).json({ error: 'No session found' });
+    }
+
+    const twitter = await userSession.getUserTwitter();
+    res.json(twitter);
+  } catch (error) {
+    console.error('Error getting Twitter credentials:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/user/:stateId/discord', async (req, res) => {
+  try {
+    const userSession = userSessions[req.params.stateId];
+    if (!userSession) {
+      return res.status(401).json({ error: 'No session found' });
+    }
+
+    const discord = await userSession.getUserDiscord();
+    res.json(discord);
+  } catch (error) {
+    console.error('Error getting Discord credentials:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/user/:stateId/telegram', async (req, res) => {
+  try {
+    const userSession = userSessions[req.params.stateId];
+    if (!userSession) {
+      return res.status(401).json({ error: 'No session found' });
+    }
+
+    const telegram = await userSession.getUserTelegram();
+    res.json(telegram);
+  } catch (error) {
+    console.error('Error getting Telegram credentials:', error);
     res.status(500).json({ error: error.message });
   }
 });
