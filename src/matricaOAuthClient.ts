@@ -19,6 +19,62 @@ interface AuthUrlResponse {
   codeVerifier: string;
 }
 
+interface UserProfile {
+  id: string;
+  username: string;
+  isAdmin: boolean;
+  registered: boolean;
+  profile: {
+    id: string;
+    name: string;
+    vanityURL: string;
+    about: string | null;
+    website: string | null;
+    emailVerified: boolean;
+    twitter: string | null;
+    twitterExternalId: string | null;
+    showTwitter: boolean | null;
+    discord: string | null;
+    pfp: string | null;
+    banner: string | null;
+    bannerOffsetTop: number | null;
+    bannerBorder: string | null;
+    bannerNFTCount: number | null;
+    bannerLeft: string | null;
+    bannerMiddle: string | null;
+    bannerRight: string | null;
+    border: string | null;
+    showGraveyard: boolean | null;
+    createdDate: string;
+    updatedDate: string;
+  };
+  isSearchSynced: boolean;
+  createdDate: string;
+  updatedDate: string;
+}
+
+enum NetworkSymbol {
+  SOL = 'SOL',
+  ETH = 'ETH',
+  BTC = 'BTC',
+  MATIC = 'MATIC'
+}
+
+enum WalletStatus {
+  HEALTHY = 'HEALTHY',
+  UNHEALTHY = 'UNHEALTHY'
+}
+
+interface UserWallet {
+  id: string;
+  index: number;
+  networkSymbol: NetworkSymbol;
+  createdDate: string;
+  updatedDate: string;
+  status: WalletStatus;
+  isSearchSynced: boolean;
+}
+
 export class MatricaOAuthClient {
   private clientId: string;
   private redirectUri: string;
@@ -145,5 +201,35 @@ export class MatricaOAuthClient {
     }
 
     return this.tokens.access_token;
+  }
+
+  private async makeAuthenticatedRequest<T>(path: string): Promise<T> {
+    const accessToken = await this.getValidAccessToken();
+    
+    const url = `${this.baseUrl}${path}`;
+    console.log(url);
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    console.log(response);
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error_description || `Failed to fetch ${path}`);
+    }
+
+    return response.json();
+  }
+
+  async getUserProfile(): Promise<UserProfile> {
+    return this.makeAuthenticatedRequest<UserProfile>('/user/profile');
+  }
+
+  async getUserWallets(): Promise<UserWallet[]> {
+    return this.makeAuthenticatedRequest<UserWallet[]>('/user/wallets');
   }
 }

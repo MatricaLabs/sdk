@@ -14,7 +14,7 @@ const client = new MatricaOAuthClient({
 
 app.get('/', async (req, res) => {
   // Get authorization URL and store codeVerifier
-  const auth = await client.getAuthorizationUrl('profile email');
+  const auth = await client.getAuthorizationUrl('profile wallets nfts email socials.twitter socials.discord socials.telegram');
   const stateId = Math.random().toString(36).substring(7); // Simple random ID
   codeVerifiers[stateId] = auth.codeVerifier;
   
@@ -38,7 +38,15 @@ app.get('/callback', async (req, res) => {
     // Clean up
     delete codeVerifiers[state];
 
-    const test = await client.getValidAccessToken();
+    // const test = await client.getValidAccessToken();
+
+    const profile = await client.getUserProfile();
+    console.log('User profile:', profile);
+
+    // Get user wallets
+    const wallets = await client.getUserWallets();
+    console.log('User wallets:', wallets);
+
     
     res.json(tokens);
   } catch (error) {
