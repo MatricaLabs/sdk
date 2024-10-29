@@ -120,6 +120,11 @@ interface OAuthCredential {
   externalName: string;
 }
 
+// Add interface for email response
+interface EmailResponse {
+  email: string | null;
+}
+
 class UserSession {
   private tokens?: TokenResponse;
   private tokenExpiresAt?: Date;
@@ -215,6 +220,10 @@ class UserSession {
 
   async getUserSocial(platform: 'twitter' | 'discord' | 'telegram'): Promise<OAuthCredential | null> {
     return this.makeAuthenticatedRequest<OAuthCredential>(`/${platform}`);
+  }
+
+  async getUserEmail(): Promise<EmailResponse> {
+    return this.makeAuthenticatedRequest<EmailResponse>('/email');
   }
 
   private async makeAuthenticatedRequest<T>(path: string): Promise<T> {

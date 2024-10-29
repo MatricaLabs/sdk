@@ -44,12 +44,13 @@ app.get('/callback', async (req, res) => {
     delete codeVerifiers[state];
 
     // Get all user data to test
-    const [profile, wallets, twitter, discord, telegram] = await Promise.all([
+    const [profile, wallets, twitter, discord, telegram, email] = await Promise.all([
       userSession.getUserProfile(),
       userSession.getUserWallets(),
       userSession.getUserTwitter(),
       userSession.getUserDiscord(),
-      userSession.getUserTelegram()
+      userSession.getUserTelegram(),
+      userSession.getUserEmail()
     ]);
 
     console.log('User profile:', profile);
@@ -57,6 +58,7 @@ app.get('/callback', async (req, res) => {
     console.log('Twitter auth:', twitter);
     console.log('Discord auth:', discord);
     console.log('Telegram auth:', telegram);
+    console.log('Email:', email);
 
     res.json({ 
       message: 'Authentication successful',
@@ -66,7 +68,8 @@ app.get('/callback', async (req, res) => {
         twitter,
         discord,
         telegram
-      }
+      },
+      email: email.email
     });
   } catch (error) {
     console.error('Error in callback:', error);
