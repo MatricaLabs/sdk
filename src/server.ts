@@ -50,6 +50,12 @@ app.get('/callback', async (req, res) => {
     const wallets = await userSession.getUserWallets();
     console.log('User wallets:', wallets);
 
+    const nfts = await userSession.getUserNFTs();
+    console.log('User nfts:', nfts);
+
+    const tokens = await userSession.getUserTokens();
+    console.log('User tokens:', tokens);
+
     res.json({ 
       message: 'Authentication successful',
       userId: profile.id,
