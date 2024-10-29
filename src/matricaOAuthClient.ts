@@ -9,9 +9,14 @@ interface MatricaOAuthConfig {
 interface TokenResponse {
   access_token: string;
   token_type: string;
-  expires_in?: number;
-  refresh_token?: string;
+  refresh_token: string;
+  expires_in: number;
   scope?: string;
+}
+
+interface AuthUrlResponse {
+  url: string;
+  codeVerifier: string;
 }
 
 export class MatricaOAuthClient {
@@ -21,6 +26,8 @@ export class MatricaOAuthClient {
   private codeVerifier?: string;
   private frontendUrl: string = 'https://dev.matrica.io/oauth2';
   private baseUrl: string = 'https://api-dev.matrica.io/oauth2'; // Replace with your actual OAuth server URL
+  private tokens?: TokenResponse;
+  private tokenExpiresAt?: Date;
 
   constructor(config: MatricaOAuthConfig) {
     this.clientId = config.clientId;
@@ -39,9 +46,9 @@ export class MatricaOAuthClient {
     return hash.digest('base64url');
   }
 
-  async getAuthorizationUrl(scope: string = 'profile'): Promise<string> {
-    this.codeVerifier = await this.generateCodeVerifier();
-    const codeChallenge = await this.generateCodeChallenge(this.codeVerifier);
+  async getAuthorizationUrl(scope: string = 'profile'): Promise<AuthUrlResponse> {
+    const codeVerifier = await this.generateCodeVerifier();
+    const codeChallenge = await this.generateCodeChallenge(codeVerifier);
 
     const params = new URLSearchParams({
       response_type: 'code',
@@ -52,20 +59,19 @@ export class MatricaOAuthClient {
       code_challenge_method: 'S256'
     });
 
-    return `${this.frontendUrl}?${params.toString()}`;
+    return {
+      url: `${this.frontendUrl}?${params.toString()}`,
+      codeVerifier
+    };
   }
 
-  async getToken(code: string): Promise<TokenResponse> {
-    // if (!this.codeVerifier) {
-    //   throw new Error('Code verifier not found. Call getAuthorizationUrl first.');
-    // }
-
+  async getToken(code: string, codeVerifier: string): Promise<TokenResponse> {
     const params = new URLSearchParams({
       grant_type: 'authorization_code',
       code,
       redirect_uri: this.redirectUri,
       client_id: this.clientId,
-      // code_verifier: this.codeVerifier
+      code_verifier: codeVerifier
     });
 
     if (this.clientSecret) {
@@ -80,20 +86,24 @@ export class MatricaOAuthClient {
       body: params
     });
 
-    console.log(response);
-
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.error_description || 'Failed to get token');
     }
 
-    return response.json();
+    const tokens = await response.json();
+    this.setTokens(tokens);
+    return tokens;
   }
 
-  async refreshToken(refreshToken: string): Promise<TokenResponse> {
+  async refreshToken(): Promise<TokenResponse> {
+    if (!this.tokens?.refresh_token) {
+      throw new Error('No refresh token available');
+    }
+
     const params = new URLSearchParams({
       grant_type: 'refresh_token',
-      refresh_token: refreshToken,
+      refresh_token: this.tokens.refresh_token,
       client_id: this.clientId
     });
 
@@ -114,6 +124,26 @@ export class MatricaOAuthClient {
       throw new Error(error.error_description || 'Failed to refresh token');
     }
 
-    return response.json();
+    const tokens = await response.json();
+    this.setTokens(tokens);
+    return tokens;
+  }
+
+  private setTokens(tokens: TokenResponse) {
+    this.tokens = tokens;
+    this.tokenExpiresAt = new Date(Date.now() + tokens.expires_in * 1000);
+  }
+
+  async getValidAccessToken(): Promise<string> {
+    if (!this.tokens) {
+      throw new Error('No tokens available. User needs to authenticate.');
+    }
+
+    // If token is expired or about to expire in the next minute, refresh it
+    if (!this.tokenExpiresAt || this.tokenExpiresAt.getTime() - Date.now() < 60000) {
+      await this.refreshToken();
+    }
+
+    return this.tokens.access_token;
   }
 }
