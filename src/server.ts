@@ -10,7 +10,8 @@ const userSessions: Record<string, any> = {}; // You might want to store these i
 const client = new MatricaOAuthClient({
   clientId: 'acf6b1eb7f87b8a',
   redirectUri: 'http://localhost:3000/callback',
-  clientSecret: 'OGXgKiKy-f-KW04eHSxmpAtTWZmFiB'
+  clientSecret: 'OGXgKiKy-f-KW04eHSxmpAtTWZmFiB',
+  environment: 'development',
 });
 
 app.get('/', async (req, res) => {

@@ -4,6 +4,9 @@ interface MatricaOAuthConfig {
   clientId: string;
   redirectUri: string;
   clientSecret?: string;
+  environment?: 'development' | 'staging' | 'production';
+  timeout?: number;
+  maxRetries?: number;
 }
 
 interface TokenResponse {
@@ -125,6 +128,21 @@ interface EmailResponse {
   email: string | null;
 }
 
+// Add custom error classes
+export class MatricaOAuthError extends Error {
+  constructor(message: string, public code?: string) {
+    super(message);
+    this.name = 'MatricaOAuthError';
+  }
+}
+
+export class MatricaAuthenticationError extends MatricaOAuthError {
+  constructor(message: string) {
+    super(message, 'AUTHENTICATION_ERROR');
+    this.name = 'MatricaAuthenticationError';
+  }
+}
+
 class UserSession {
   private tokens?: TokenResponse;
   private tokenExpiresAt?: Date;
@@ -132,6 +150,7 @@ class UserSession {
   constructor(
     private clientId: string,
     private clientSecret?: string,
+    private baseUrls: { token: string; user: string },
     initialTokens?: TokenResponse
   ) {
     if (initialTokens) {
@@ -159,7 +178,7 @@ class UserSession {
       params.append('client_secret', this.clientSecret);
     }
 
-    const response = await fetch(`${MatricaOAuthClient.AUTH_BASE_URL}/token`, {
+    const response = await fetch(`${this.baseUrls.token}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -229,7 +248,7 @@ class UserSession {
   private async makeAuthenticatedRequest<T>(path: string): Promise<T> {
     const accessToken = await this.getValidAccessToken();
     
-    const response = await fetch(`${MatricaOAuthClient.USER_BASE_URL}${path}`, {
+    const response = await fetch(`${this.baseUrls.user}${path}`, {
       headers: {
         'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json'
@@ -249,15 +268,32 @@ export class MatricaOAuthClient {
   private clientId: string;
   private redirectUri: string;
   private clientSecret?: string;
-  private frontendUrl: string = 'https://dev.matrica.io/oauth2';
-  public static readonly AUTH_BASE_URL = 'https://api-dev.matrica.io/oauth2';
-  public static readonly TOKEN_URL = `${MatricaOAuthClient.AUTH_BASE_URL}/token`;
-  public static readonly USER_BASE_URL = `${MatricaOAuthClient.AUTH_BASE_URL}/user`;
+  private readonly timeout: number;
+  private readonly maxRetries: number;
+  private readonly baseUrls: {
+    frontend: string;
+    auth: string;
+    token: string;
+    user: string;
+  };
 
   constructor(config: MatricaOAuthConfig) {
     this.clientId = config.clientId;
     this.redirectUri = config.redirectUri;
     this.clientSecret = config.clientSecret;
+    this.timeout = config.timeout || 30000;
+    this.maxRetries = config.maxRetries || 3;
+
+    // Update URL structure based on environment
+    const apiPrefix = config.environment === 'development' ? 'api-dev' : 'api';
+    const baseApiUrl = `https://${apiPrefix}.matrica.io/oauth2`;
+
+    this.baseUrls = {
+      frontend: `https://${config.environment === 'production' ? '' : 'dev.'}matrica.io/oauth2`,
+      auth: `${baseApiUrl}`,
+      token: `${baseApiUrl}/token`,
+      user: `${baseApiUrl}/user`
+    };
   }
 
   async getAuthorizationUrl(scope: string = 'profile'): Promise<AuthUrlResponse> {
@@ -274,7 +310,7 @@ export class MatricaOAuthClient {
     });
 
     return {
-      url: `${this.frontendUrl}?${params.toString()}`,
+      url: `${this.baseUrls.frontend}?${params.toString()}`,
       codeVerifier
     };
   }
@@ -292,7 +328,7 @@ export class MatricaOAuthClient {
       params.append('client_secret', this.clientSecret);
     }
 
-    const response = await fetch(MatricaOAuthClient.TOKEN_URL, {
+    const response = await this.fetchWithRetry(this.baseUrls.token, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -300,17 +336,28 @@ export class MatricaOAuthClient {
       body: params
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error_description || 'Failed to get token');
-    }
-
     const tokens = await response.json();
-    return new UserSession(this.clientId, this.clientSecret, tokens);
+    return new UserSession(
+      this.clientId, 
+      this.clientSecret, 
+      { 
+        token: this.baseUrls.token, 
+        user: this.baseUrls.user 
+      }, 
+      tokens
+    );
   }
 
   createSessionFromTokens(tokens: TokenResponse): UserSession {
-    return new UserSession(this.clientId, this.clientSecret, tokens);
+    return new UserSession(
+      this.clientId, 
+      this.clientSecret, 
+      { 
+        token: this.baseUrls.token, 
+        user: this.baseUrls.user 
+      }, 
+      tokens
+    );
   }
 
   private async generateCodeVerifier(): Promise<string> {
@@ -322,5 +369,44 @@ export class MatricaOAuthClient {
     const hash = crypto.createHash('sha256');
     hash.update(verifier);
     return hash.digest('base64url');
+  }
+
+  // Add helper method for API calls with retries
+  private async fetchWithRetry(url: string, options: RequestInit, retries = 0): Promise<Response> {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+
+      console.log('Fetching URL:', url);
+      
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new MatricaOAuthError(
+          error.error_description || `Request failed with status ${response.status}`,
+          error.error
+        );
+      }
+      
+      return response;
+    } catch (error) {
+      if (error instanceof MatricaOAuthError) throw error;
+      
+      if (retries < this.maxRetries) {
+        // Exponential backoff
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, retries) * 1000));
+        return this.fetchWithRetry(url, options, retries + 1);
+      }
+      
+      throw new MatricaOAuthError(
+        error instanceof Error ? error.message : 'Network request failed'
+      );
+    }
   }
 }
