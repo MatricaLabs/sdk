@@ -3,8 +3,9 @@ import { MatricaOAuthClient } from './matricaOAuthClient';
 
 const app = express();
 
-// Simple in-memory store for code verifiers
+// Store for code verifiers and user sessions
 const codeVerifiers: Record<string, string> = {};
+const userSessions: Record<string, any> = {}; // You might want to store these in a database instead
 
 const client = new MatricaOAuthClient({
   clientId: 'acf6b1eb7f87b8a',
@@ -15,7 +16,7 @@ const client = new MatricaOAuthClient({
 app.get('/', async (req, res) => {
   // Get authorization URL and store codeVerifier
   const auth = await client.getAuthorizationUrl('profile wallets nfts email socials.twitter socials.discord socials.telegram');
-  const stateId = Math.random().toString(36).substring(7); // Simple random ID
+  const stateId = Math.random().toString(36).substring(7);
   codeVerifiers[stateId] = auth.codeVerifier;
   
   // Add state to the auth URL
@@ -33,24 +34,60 @@ app.get('/callback', async (req, res) => {
       throw new Error('Missing code or codeVerifier');
     }
 
-    const tokens = await client.getToken(code, codeVerifier);
+    // Create a new user session
+    const userSession = await client.createSession(code, codeVerifier);
     
-    // Clean up
+    // Store the session (you might want to use a database in production)
+    userSessions[state] = userSession;
+
+    // Clean up code verifier
     delete codeVerifiers[state];
 
-    // const test = await client.getValidAccessToken();
-
-    const profile = await client.getUserProfile();
+    // Example of using the session to get user data
+    const profile = await userSession.getUserProfile();
     console.log('User profile:', profile);
 
-    // Get user wallets
-    const wallets = await client.getUserWallets();
+    const wallets = await userSession.getUserWallets();
     console.log('User wallets:', wallets);
 
-    
-    res.json(tokens);
+    res.json({ 
+      message: 'Authentication successful',
+      userId: profile.id,
+      wallets: wallets.map(w => w.id)
+    });
   } catch (error) {
-    console.error('Error getting tokens:', error);
+    console.error('Error in callback:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Example of an endpoint using a stored session
+app.get('/user/:stateId/profile', async (req, res) => {
+  try {
+    const userSession = userSessions[req.params.stateId];
+    if (!userSession) {
+      return res.status(401).json({ error: 'No session found' });
+    }
+
+    const profile = await userSession.getUserProfile();
+    res.json(profile);
+  } catch (error) {
+    console.error('Error getting profile:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/user/:stateId/wallets', async (req, res) => {
+  try {
+    const userSession = userSessions[req.params.stateId];
+    if (!userSession) {
+      return res.status(401).json({ error: 'No session found' });
+    }
+
+    const wallets = await userSession.getUserWallets();
+    res.json(wallets);
+  } catch (error) {
+    console.error('Error getting wallets:', error);
     res.status(500).json({ error: error.message });
   }
 });
