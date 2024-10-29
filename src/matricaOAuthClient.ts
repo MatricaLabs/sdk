@@ -1,155 +1,29 @@
 import crypto from 'crypto';
+import {
+  MatricaOAuthConfig,
+  TokenResponse,
+  AuthUrlResponse,
+  MatricaLogger
+} from './types/interfaces';
+import { UserProfile } from './types/user';
+import { UserWallet, WalletToken } from './types/wallet';
+import { NFT } from './types/nft';
+import { OAuthCredential } from './types/social';
+import { validateConfig } from './utils/validation';
+import { MatricaOAuthError, MatricaAuthenticationError } from './errors';
 
-interface MatricaOAuthConfig {
-  clientId: string;
-  redirectUri: string;
-  clientSecret?: string;
-  environment?: 'development' | 'staging' | 'production';
-  timeout?: number;
-  maxRetries?: number;
-}
-
-interface TokenResponse {
-  access_token: string;
-  token_type: string;
-  refresh_token: string;
-  expires_in: number;
-  scope?: string;
-}
-
-interface AuthUrlResponse {
-  url: string;
-  codeVerifier: string;
-}
-
-interface UserProfile {
-  id: string;
-  username: string;
-  isAdmin: boolean;
-  registered: boolean;
-  profile: {
-    id: string;
-    name: string;
-    vanityURL: string;
-    about: string | null;
-    website: string | null;
-    emailVerified: boolean;
-    twitter: string | null;
-    twitterExternalId: string | null;
-    showTwitter: boolean | null;
-    discord: string | null;
-    pfp: string | null;
-    banner: string | null;
-    bannerOffsetTop: number | null;
-    bannerBorder: string | null;
-    bannerNFTCount: number | null;
-    bannerLeft: string | null;
-    bannerMiddle: string | null;
-    bannerRight: string | null;
-    border: string | null;
-    showGraveyard: boolean | null;
-    createdDate: string;
-    updatedDate: string;
-  };
-  isSearchSynced: boolean;
-  createdDate: string;
-  updatedDate: string;
-}
-
-enum NetworkSymbol {
-  SOL = 'SOL',
-  ETH = 'ETH',
-  BTC = 'BTC',
-  MATIC = 'MATIC'
-}
-
-enum WalletStatus {
-  HEALTHY = 'HEALTHY',
-  UNHEALTHY = 'UNHEALTHY'
-}
-
-interface UserWallet {
-  id: string;
-  index: number;
-  networkSymbol: NetworkSymbol;
-  createdDate: string;
-  updatedDate: string;
-  status: WalletStatus;
-  isSearchSynced: boolean;
-}
-
-interface NFT {
-  id: string;
-  tokenId: string | null;
-  name: string | null;
-  index: number | null;
-  image: string | null;
-  animation: string | null;
-  externalURL: string | null;
-  metadataCategory: string | null;
-  description: string | null;
-  symbol: string;
-  uri: string | null;
-  url: string | null;
-  cacheDate: string | null;
-  attributes: string | null;
-  collection: string | null;
-  collectionId: string | null;
-  updateAuthority: string;
-  status: string;
-  primarySaleHappened: boolean;
-  sellerFeeBasisPoints: number;
-  isMutable: boolean;
-  lastParsed: string;
-  networkSymbol: string;
-  ownerId: string;
-  createdDate: string;
-  updatedDate: string;
-  metadataUpdatedDate: string;
-  isSearchSynced: boolean;
-  isCompressed: boolean;
-  inscriptionNumber: number | null;
-}
-
-interface WalletToken {
-  walletId: string;
-  tokenId: string | null;
-  amount: number;
-}
-
-interface OAuthCredential {
-  name: string;
-  externalId: string;
-  externalName: string;
-}
-
-// Add interface for email response
 interface EmailResponse {
   email: string | null;
 }
 
-// Add custom error classes
-export class MatricaOAuthError extends Error {
-  constructor(message: string, public code?: string) {
-    super(message);
-    this.name = 'MatricaOAuthError';
-  }
-}
-
-export class MatricaAuthenticationError extends MatricaOAuthError {
-  constructor(message: string) {
-    super(message, 'AUTHENTICATION_ERROR');
-    this.name = 'MatricaAuthenticationError';
-  }
-}
-
-class UserSession {
+// Export the UserSession class
+export class UserSession {
   private tokens?: TokenResponse;
   private tokenExpiresAt?: Date;
 
   constructor(
     private clientId: string,
-    private clientSecret?: string,
+    private clientSecret: string | undefined,
     private baseUrls: { token: string; user: string },
     initialTokens?: TokenResponse
   ) {
@@ -276,8 +150,11 @@ export class MatricaOAuthClient {
     token: string;
     user: string;
   };
+  private readonly logger?: MatricaLogger;
 
   constructor(config: MatricaOAuthConfig) {
+    validateConfig(config);
+    this.logger = config.logger;
     this.clientId = config.clientId;
     this.redirectUri = config.redirectUri;
     this.clientSecret = config.clientSecret;
@@ -374,6 +251,7 @@ export class MatricaOAuthClient {
   // Add helper method for API calls with retries
   private async fetchWithRetry(url: string, options: RequestInit, retries = 0): Promise<Response> {
     try {
+      this.logger?.debug('Making request to:', url);
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
@@ -396,6 +274,7 @@ export class MatricaOAuthClient {
       
       return response;
     } catch (error) {
+      this.logger?.error('Request failed:', error);
       if (error instanceof MatricaOAuthError) throw error;
       
       if (retries < this.maxRetries) {
