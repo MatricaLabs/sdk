@@ -1,0 +1,16 @@
+tests/
+examples/
+coverage/
+.env
+.env.*
+.gitignore
+.git
+.github
+jest.config.js
+jest.config.ts
+tsconfig.json
+*.test.ts
+*.spec.ts
+.npmrc
+.DS_Store
+node_modules/

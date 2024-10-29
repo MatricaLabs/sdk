@@ -1,24 +1,30 @@
 {
   "name": "@matrica/oauth-sdk",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
-  "main": "dist/matricaOAuthClient.js",
-  "types": "dist/matricaOAuthClient.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "test": "jest",
-    "build": "tsc"
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "build": "tsc",
+    "prepublishOnly": "npm test && npm run build",
+    "prepare": "npm run build",
+    "version": "git add -A src",
+    "postversion": "git push && git push --tags"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "express": "^4.21.1"
-  },
   "devDependencies": {
     "@types/express": "^5.0.0",
     "@types/jest": "^27.0.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
     "jest": "^27.0.0",
     "ts-jest": "^27.0.0",
+    "ts-node": "^10.9.2",
     "typescript": "^4.0.0"
   }
 }

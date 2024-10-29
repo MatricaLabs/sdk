@@ -1,0 +1,32 @@
+export interface NFT {
+    id: string;
+    tokenId: string | null;
+    name: string | null;
+    index: number | null;
+    image: string | null;
+    animation: string | null;
+    externalURL: string | null;
+    metadataCategory: string | null;
+    description: string | null;
+    symbol: string;
+    uri: string | null;
+    url: string | null;
+    cacheDate: string | null;
+    attributes: string | null;
+    collection: string | null;
+    collectionId: string | null;
+    updateAuthority: string;
+    status: string;
+    primarySaleHappened: boolean;
+    sellerFeeBasisPoints: number;
+    isMutable: boolean;
+    lastParsed: string;
+    networkSymbol: string;
+    ownerId: string;
+    createdDate: string;
+    updatedDate: string;
+    metadataUpdatedDate: string;
+    isSearchSynced: boolean;
+    isCompressed: boolean;
+    inscriptionNumber: number | null;
+} 
