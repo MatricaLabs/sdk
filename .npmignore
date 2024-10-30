@@ -1,0 +1,10 @@
+src/
+tests/
+examples/
+coverage/
+.env
+.gitignore
+jest.config.js
+tsconfig.json
+*.test.ts
+*.spec.ts 

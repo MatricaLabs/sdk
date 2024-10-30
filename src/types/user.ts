@@ -32,4 +32,8 @@ export interface UserProfileDetails {
   showGraveyard: boolean | null;
   createdDate: string;
   updatedDate: string;
+}
+
+export interface EmailResponse {
+  email: string | null;
 } 

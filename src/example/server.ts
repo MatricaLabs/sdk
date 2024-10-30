@@ -16,9 +16,10 @@ const client = new MatricaOAuthClient({
   environment: 'development',
 });
 
+const scopeList = ['profile', 'wallets', 'nfts', 'email', 'socials.twitter', 'socials.discord', 'socials.telegram'];
 app.get('/', async (req, res) => {
-  // Get authorization URL and store codeVerifier
-  const auth = await client.getAuthorizationUrl('profile wallets nfts email socials.twitter socials.discord socials.telegram');
+  const scopes = scopeList.join(' '); // get all scopes
+  const auth = await client.getAuthorizationUrl(scopes);
   const stateId = Math.random().toString(36).substring(7);
   codeVerifiers[stateId] = auth.codeVerifier;
   
