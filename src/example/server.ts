@@ -1,4 +1,5 @@
 import express from 'express';
+import { Router } from 'express';
 import { MatricaOAuthClient } from '../matricaOAuthClient';
 import dotenv from 'dotenv';
 import { MatricaScope } from '../types/enum';
@@ -79,110 +80,14 @@ app.get('/callback', async (req, res) => {
         });
     } catch (error) {
         console.error('Error in callback:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Example of an endpoint using a stored session
-app.get('/user/:stateId/profile', async (req, res) => {
-    try {
-        const userSession = userSessions[req.params.stateId];
-        if (!userSession) {
-            return res.status(401).json({ error: 'No session found' });
-        }
-
-        const profile = await userSession.getUserProfile();
-        res.json(profile);
-    } catch (error) {
-        console.error('Error getting profile:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-app.get('/user/:stateId/wallets', async (req, res) => {
-    try {
-        const userSession = userSessions[req.params.stateId];
-        if (!userSession) {
-            return res.status(401).json({ error: 'No session found' });
-        }
-
-        const wallets = await userSession.getUserWallets();
-        res.json(wallets);
-    } catch (error) {
-        console.error('Error getting wallets:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Helper function to reduce duplication
-const createSocialEndpoint = (platform: string) => {
-    app.get(`/user/:stateId/${platform}`, async (req, res) => {
-        try {
-            const userSession = userSessions[req.params.stateId];
-            if (!userSession) {
-                return res.status(401).json({ error: 'No session found' });
-            }
-
-            const social = await userSession[`getUser${platform.charAt(0).toUpperCase() + platform.slice(1)}`]();
-            res.json(social);
-        } catch (error) {
-            console.error(`Error getting ${platform} credentials:`, error);
+        if (error instanceof Error) {
             res.status(500).json({ error: error.message });
+        } else {
+            res.status(500).json({ error: 'An unexpected error occurred' });
         }
-    });
-};
-
-// Create endpoints for each social platform
-createSocialEndpoint('twitter');
-createSocialEndpoint('discord');
-createSocialEndpoint('telegram');
-
-// Or if you prefer explicit endpoints:
-app.get('/user/:stateId/twitter', async (req, res) => {
-    try {
-        const userSession = userSessions[req.params.stateId];
-        if (!userSession) {
-            return res.status(401).json({ error: 'No session found' });
-        }
-
-        const twitter = await userSession.getUserTwitter();
-        res.json(twitter);
-    } catch (error) {
-        console.error('Error getting Twitter credentials:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-app.get('/user/:stateId/discord', async (req, res) => {
-    try {
-        const userSession = userSessions[req.params.stateId];
-        if (!userSession) {
-            return res.status(401).json({ error: 'No session found' });
-        }
-
-        const discord = await userSession.getUserDiscord();
-        res.json(discord);
-    } catch (error) {
-        console.error('Error getting Discord credentials:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-app.get('/user/:stateId/telegram', async (req, res) => {
-    try {
-        const userSession = userSessions[req.params.stateId];
-        if (!userSession) {
-            return res.status(401).json({ error: 'No session found' });
-        }
-
-        const telegram = await userSession.getUserTelegram();
-        res.json(telegram);
-    } catch (error) {
-        console.error('Error getting Telegram credentials:', error);
-        res.status(500).json({ error: error.message });
     }
 });
 
 app.listen(3000, () => {
     console.log('Server running at http://localhost:3000');
-}); 
+});
