@@ -1,6 +1,7 @@
 import express from 'express';
 import { MatricaOAuthClient } from '../matricaOAuthClient';
 import dotenv from 'dotenv';
+import { MatricaScope } from '../types/enum';
 dotenv.config();
 
 const app = express();
@@ -16,7 +17,7 @@ const client = new MatricaOAuthClient({
     environment: 'development',
 });
 
-const scopeList = ['profile', 'wallets', 'nfts', 'email', 'socials.twitter', 'socials.discord', 'socials.telegram'];
+const scopeList = Object.values(MatricaScope);
 
 app.get('/', async (req, res) => {
     const scopes = scopeList.join(' '); // get all scopes
