@@ -2,8 +2,8 @@
   "name": "@matrica/oauth-sdk",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/matricaOAuthClient.js",
-  "types": "dist/matricaOAuthClient.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",

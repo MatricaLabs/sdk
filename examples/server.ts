@@ -1,8 +1,6 @@
 import express from 'express';
-import { Router } from 'express';
-import { MatricaOAuthClient } from '../matricaOAuthClient';
+import { EmailResponse, MatricaOAuthClient, MatricaScope, OAuthCredential, UserProfile, UserWallet } from '../src';
 import dotenv from 'dotenv';
-import { MatricaScope } from '../types/enum';
 dotenv.config();
 
 const app = express();
@@ -50,8 +48,8 @@ app.get('/callback', async (req, res) => {
         // Clean up code verifier
         delete codeVerifiers[state];
 
-        // Get all user data to test
-        const [profile, wallets, twitter, discord, telegram, email] = await Promise.all([
+        // Get all user data to test - using allSettled to handle potential failures
+        const results = await Promise.allSettled([
             userSession.getUserProfile(),
             userSession.getUserWallets(),
             userSession.getUserTwitter(),
@@ -59,6 +57,29 @@ app.get('/callback', async (req, res) => {
             userSession.getUserTelegram(),
             userSession.getUserEmail()
         ]);
+
+        // Process results and log them with proper typing
+        const [
+            profile,
+            wallets,
+            twitter,
+            discord,
+            telegram,
+            email
+        ] = results.map((result, index) => {
+            if (result.status === 'fulfilled') {
+                return result.value;
+            }
+            console.error(`Failed to fetch data for index ${index}:`, result.reason);
+            return null;
+        }) as [
+            UserProfile | null,
+            UserWallet[] | null,
+            OAuthCredential | null,
+            OAuthCredential | null,
+            OAuthCredential | null,
+            EmailResponse | null
+        ];
 
         console.log('User profile:', profile);
         console.log('User wallets:', wallets);
@@ -69,14 +90,14 @@ app.get('/callback', async (req, res) => {
 
         res.json({
             message: 'Authentication successful',
-            userId: profile.id,
-            wallets: wallets.map(w => w.id),
+            userId: profile?.id,
+            wallets: wallets?.map((w: { id: string }) => w.id),
             socials: {
                 twitter,
                 discord,
                 telegram
             },
-            email: email.email
+            email: email?.email
         });
     } catch (error) {
         console.error('Error in callback:', error);
