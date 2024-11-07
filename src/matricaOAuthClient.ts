@@ -5,13 +5,12 @@ import {
     AuthUrlResponse,
     MatricaLogger
 } from './types/interfaces';
-import { UserProfile } from './types/user';
+import { UserProfile, EmailResponse } from './types/user';
 import { UserWallet, WalletToken } from './types/wallet';
 import { NFT } from './types/nft';
 import { OAuthCredential } from './types/social';
 import { validateConfig } from './utils/validation';
 import { MatricaOAuthError } from './errors';
-import { EmailResponse } from './types/user';
 
 // Export the UserSession class
 export class UserSession {
