@@ -158,11 +158,10 @@ export class MatricaOAuthClient {
         this.maxRetries = config.maxRetries || 3;
 
         // Update URL structure based on environment
-        const apiPrefix = config.environment === 'development' ? 'api-dev' : 'api';
-        const baseApiUrl = `https://${apiPrefix}.matrica.io/oauth2`;
+        const baseApiUrl = `https://api.matrica.io/oauth2`;
 
         this.baseUrls = {
-            frontend: `https://${config.environment === 'production' ? '' : 'dev.'}matrica.io/oauth2`,
+            frontend: `https://matrica.io/oauth2`,
             auth: `${baseApiUrl}`,
             token: `${baseApiUrl}/token`,
             user: `${baseApiUrl}/user`
