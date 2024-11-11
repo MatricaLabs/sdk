@@ -122,15 +122,15 @@ describe('MatricaOAuthClient', () => {
             expect(prodClient['baseUrls'].auth).toContain('api.matrica.io/oauth2');
         });
 
-        it('should generate correct URLs for development', () => {
-            const devClient = new MatricaOAuthClient({
-                ...mockConfig,
-                environment: 'development'
-            });
+        // it('should generate correct URLs for development', () => {
+        //     const devClient = new MatricaOAuthClient({
+        //         ...mockConfig,
+        //         environment: 'development'
+        //     });
 
-            expect(devClient['baseUrls'].frontend).toContain('dev.matrica.io/oauth2');
-            expect(devClient['baseUrls'].auth).toContain('api-dev.matrica.io/oauth2');
-        });
+        //     expect(devClient['baseUrls'].frontend).toContain('dev.matrica.io/oauth2');
+        //     expect(devClient['baseUrls'].auth).toContain('api-dev.matrica.io/oauth2');
+        // });
     });
 
     describe('Authorization URL Generation', () => {

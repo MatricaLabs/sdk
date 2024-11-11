@@ -169,8 +169,8 @@ export class MatricaOAuthClient {
     }
 
     async getAuthorizationUrl(scope: string = 'profile'): Promise<AuthUrlResponse> {
-        const codeVerifier = await this.generateCodeVerifier();
-        const codeChallenge = await this.generateCodeChallenge(codeVerifier);
+        const codeVerifier = MatricaOAuthClient.generateRandomCode();
+        const codeChallenge = MatricaOAuthClient.generateCodeChallenge(codeVerifier);
 
         const params = new URLSearchParams({
             response_type: 'code',
@@ -232,12 +232,12 @@ export class MatricaOAuthClient {
         );
     }
 
-    private async generateCodeVerifier(): Promise<string> {
+    static generateRandomCode(): string {
         const buffer = crypto.randomBytes(32);
         return buffer.toString('base64url');
     }
 
-    private async generateCodeChallenge(verifier: string): Promise<string> {
+    static generateCodeChallenge(verifier: string): string {
         const hash = crypto.createHash('sha256');
         hash.update(verifier);
         return hash.digest('base64url');
