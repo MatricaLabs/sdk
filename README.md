@@ -46,8 +46,8 @@ const client = new MatricaOAuthClient({
     redirectUri: 'http://localhost:3000/callback'
 });
 
-const code = 'your-code';
-const codeVerifier = 'your-code-verifier';
+const code = 'random-string';
+const codeVerifier = MatricaOAuthClient.generateCodeChallenge(code);
 
 const userSession = await client.createSession(code, codeVerifier);
 
