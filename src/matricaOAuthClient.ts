@@ -11,6 +11,7 @@ import { NFT } from './types/nft';
 import { OAuthCredential } from './types/social';
 import { validateConfig } from './utils/validation';
 import { MatricaOAuthError } from './errors';
+import { DomainResponse } from './types/domain';
 
 // Export the UserSession class
 export class UserSession {
@@ -109,6 +110,10 @@ export class UserSession {
 
     async getUserSocial(platform: 'twitter' | 'discord' | 'telegram'): Promise<OAuthCredential | null> {
         return this.makeAuthenticatedRequest<OAuthCredential>(`/${platform}`);
+    }
+
+    async getUserDomains(): Promise<DomainResponse> {
+        return this.makeAuthenticatedRequest<DomainResponse>('/domains');
     }
 
     async getUserEmail(): Promise<EmailResponse> {

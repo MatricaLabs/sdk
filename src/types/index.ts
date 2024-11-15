@@ -4,4 +4,5 @@ export * from './interfaces';
 export * from './nft';
 export * from './social';
 export * from './user';
-export * from './wallet'; 
+export * from './wallet';
+export * from './domain'; 
