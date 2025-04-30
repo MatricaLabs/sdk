@@ -162,7 +162,7 @@ export class MatricaOAuthClient {
 
         this.baseUrls = {
             frontend: `https://matrica.io/oauth2`,
-            auth: `${baseApiUrl}`,
+            auth: `${baseApiUrl}/authorize`,
             token: `${baseApiUrl}/token`,
             user: `${baseApiUrl}/user`
         };
