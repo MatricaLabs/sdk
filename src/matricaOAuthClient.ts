@@ -71,7 +71,7 @@ export class UserSession {
             throw new Error('No tokens available. User needs to authenticate.');
         }
 
-        if (!this.tokenExpiresAt || this.tokenExpiresAt.getTime() - Date.now() < 60000) {
+        if (!this.tokenExpiresAt || this.tokenExpiresAt.getTime() - Date.now() < 300000) {
             await this.refreshToken();
         }
 
