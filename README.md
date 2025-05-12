@@ -10,6 +10,36 @@ A lightweight SDK for integrating Matrica authentication into your applications.
 npm install @matrica/oauth-sdk
 ```
 
+## Version 2.0 Support
+
+Starting with version 2.0.0, this SDK supports both v1 and v2 of the Matrica OAuth API. The default exports are compatible with v1 for backward compatibility, while v2 endpoints can be accessed through the v2 namespace.
+
+### Using v1 (Legacy)
+
+```typescript
+// Default imports use v1 for backward compatibility
+import { MatricaOAuthClient } from '@matrica/oauth-sdk';
+
+const client = new MatricaOAuthClient({
+    clientId: 'your-client-id',
+    clientSecret: process.env.CLIENT_SECRET,
+    redirectUri: 'http://localhost:3000/callback'
+});
+```
+
+### Using v2 (Recommended for new applications)
+
+```typescript
+// Use the v2 namespace for new applications
+import { v2 } from '@matrica/oauth-sdk';
+
+const client = new v2.MatricaOAuthClient({
+    clientId: 'your-client-id',
+    clientSecret: process.env.CLIENT_SECRET,
+    redirectUri: 'http://localhost:3000/callback'
+});
+```
+
 ## Quick Start
 
 ```typescript
