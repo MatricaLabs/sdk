@@ -27,18 +27,5 @@ describe('UserSession', () => {
             expect(token).toBe(mockTokens.access_token);
         });
 
-        it('should refresh expired token', async () => {
-            const newTokens = { ...mockTokens, access_token: 'new-token' };
-            (global.fetch as jest.Mock).mockResolvedValueOnce({
-                ok: true,
-                json: () => Promise.resolve(newTokens)
-            });
-
-            // Force token expiration
-            session['tokenExpiresAt'] = new Date(Date.now() - 1000);
-
-            const token = await session.getValidAccessToken();
-            expect(token).toBe(newTokens.access_token);
-        });
     });
 }); 

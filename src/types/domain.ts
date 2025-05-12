@@ -7,4 +7,4 @@ export interface DomainName {
 
 export interface DomainResponse {
     domains: DomainName[];
-} 
+}

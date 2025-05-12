@@ -9,14 +9,15 @@ import { UserProfile, EmailResponse } from './types/user';
 import { UserWallet, WalletToken } from './types/wallet';
 import { NFT } from './types/nft';
 import { OAuthCredential } from './types/social';
+import { DomainName } from './types/domain';
 import { validateConfig } from './utils/validation';
 import { MatricaOAuthError } from './errors';
 import { DomainResponse } from './types/domain';
 
+
 // Export the UserSession class
 export class UserSession {
     private tokens?: TokenResponse;
-    private tokenExpiresAt?: Date;
 
     constructor(
         private clientId: string,
@@ -31,7 +32,6 @@ export class UserSession {
 
     private setTokens(tokens: TokenResponse) {
         this.tokens = tokens;
-        this.tokenExpiresAt = new Date(Date.now() + tokens.expires_in * 1000);
     }
 
     async refreshToken(): Promise<TokenResponse> {
@@ -72,15 +72,15 @@ export class UserSession {
             throw new Error('No tokens available. User needs to authenticate.');
         }
 
-        if (!this.tokenExpiresAt || this.tokenExpiresAt.getTime() - Date.now() < 300000) {
-            await this.refreshToken();
-        }
-
         return this.tokens.access_token;
     }
 
     async getUserProfile(): Promise<UserProfile> {
         return this.makeAuthenticatedRequest<UserProfile>('/profile');
+    }
+
+    async getDomains(): Promise<DomainName[]> {
+        return this.makeAuthenticatedRequest<DomainName[]>('/domains');
     }
 
     async getUserWallets(): Promise<UserWallet[]> {
