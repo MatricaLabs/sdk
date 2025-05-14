@@ -5,24 +5,59 @@ import {
     AuthUrlResponse,
     MatricaLogger
 } from '../types/interfaces';
-import { UserProfile, EmailResponse } from '../types/user';
-import { UserWallet, WalletToken } from '../types/wallet';
-import { NFT } from '../types/nft';
-import { OAuthCredential } from '../types/social';
-import { DomainName, DomainResponse } from '../types/domain';
+import {
+    UserProfile,
+    EmailResponse,
+    // UserProfileDetails, // Already part of UserProfile
+} from '../types/user';
+import {
+    UserWalletV2, // Changed from UserWallet
+    WalletTokenV2, // Changed from WalletToken
+    // TokenInfoV2 // Part of WalletTokenV2
+} from '../types/wallet';
+import {
+    NFTV2, // Changed from NFT
+    // NFTCollectionInfoV2 // Part of NFTV2
+} from '../types/nft';
+import {
+    // OAuthCredential, // Replaced by specific V2 social types
+    TwitterInfoV2,
+    DiscordInfoV2,
+    TelegramInfoV2,
+} from '../types/social';
+import {
+    DomainNameV2, // Changed from DomainName
+    // DomainResponse // Will be replaced by PaginatedResponse<DomainNameV2>
+    // OwnerWalletInfoV2 // Part of DomainNameV2
+} from '../types/domain';
+import { UserRoleV2 } from '../types/roles.v2';
+import {
+    PaginatedResponse,
+    PaginationInfo,
+    NFTQueryOptionsV2,
+    TokenQueryOptionsV2,
+    DomainQueryOptionsV2,
+    BaseQueryOptions, // For methods that might not have specific V2 options yet but are paginated
+} from '../types/common.v2';
 import { validateConfig } from '../utils/validation';
 import { MatricaOAuthError } from '../errors';
 
 // Export the UserSession class for v2
 export class UserSession {
     private tokens?: TokenResponse;
+    private clientId: string;
+    private clientSecret: string | undefined;
+    private baseUrls: { token: string; user: string };
 
     constructor(
-        private clientId: string,
-        private clientSecret: string | undefined,
-        private baseUrls: { token: string; user: string },
+        clientId: string,
+        clientSecret: string | undefined,
+        baseUrls: { token: string; user: string },
         initialTokens?: TokenResponse
     ) {
+        this.clientId = clientId;
+        this.clientSecret = clientSecret;
+        this.baseUrls = baseUrls;
         if (initialTokens) {
             this.setTokens(initialTokens);
         }
@@ -30,6 +65,48 @@ export class UserSession {
 
     private setTokens(tokens: TokenResponse) {
         this.tokens = tokens;
+    }
+
+    private _buildQueryString(options?: BaseQueryOptions | NFTQueryOptionsV2 | TokenQueryOptionsV2 | DomainQueryOptionsV2): string {
+        if (!options) return '';
+        const params = new URLSearchParams();
+        for (const [key, value] of Object.entries(options)) {
+            if (value !== undefined && value !== null) {
+                if (key === 'tokenIds' && Array.isArray(value)) {
+                    params.append(key, value.join(','));
+                } else {
+                    params.append(key, String(value));
+                }
+            }
+        }
+        const queryString = params.toString();
+        return queryString ? `?${queryString}` : '';
+    }
+
+    private async makePaginatedRequest<T>(path: string, options?: BaseQueryOptions): Promise<PaginatedResponse<T>> {
+        const accessToken = await this.getValidAccessToken();
+        const queryString = this._buildQueryString(options);
+
+        const response = await fetch(`${this.baseUrls.user}${path}${queryString}`, {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error_description || `Failed to fetch ${path}`);
+        }
+
+        const data = await response.json();
+        const pagination: PaginationInfo = {
+            count: parseInt(response.headers.get('Pagination-Count') || '0', 10),
+            skip: parseInt(response.headers.get('Pagination-Skip') || '0', 10),
+            take: parseInt(response.headers.get('Pagination-Take') || '0', 10),
+        };
+
+        return { data, pagination };
     }
 
     async refreshToken(): Promise<TokenResponse> {
@@ -73,49 +150,63 @@ export class UserSession {
         return this.tokens.access_token;
     }
 
-    async getUserProfile(): Promise<UserProfile> {
-        return this.makeAuthenticatedRequest<UserProfile>('/profile');
+    async getUserProfile(): Promise<UserProfile | null> {
+        const response = await this.makeAuthenticatedRequest<{ profile: UserProfile | null }>('/profile');
+        return response.profile;
     }
 
-    async getDomains(): Promise<DomainName[]> {
-        return this.makeAuthenticatedRequest<DomainName[]>('/domains');
+    async getDomains(): Promise<DomainNameV2[]> {
+        throw new Error('getDomains() without pagination is ambiguous for V2. Use getUserDomains(options) for paginated V2 domains.');
     }
 
-    async getUserWallets(): Promise<UserWallet[]> {
-        return this.makeAuthenticatedRequest<UserWallet[]>('/wallets');
+    async getUserWallets(): Promise<UserWalletV2[]> {
+        const response = await this.makeAuthenticatedRequest<{ wallets: UserWalletV2[] | [] }>('/wallets');
+        return response.wallets;
     }
 
-    async getUserNFTs(nftId?: string): Promise<NFT[]> {
-        const path = '/nfts' + (nftId ? `?nftId=${nftId}` : '');
-        return this.makeAuthenticatedRequest<NFT[]>(path);
+    async getUserNFTs(options?: NFTQueryOptionsV2): Promise<PaginatedResponse<NFTV2>> {
+        return this.makePaginatedRequest<NFTV2>('/nfts', options);
     }
 
-    async getUserTokens(): Promise<WalletToken[]> {
-        return this.makeAuthenticatedRequest<WalletToken[]>('/tokens');
+    async getUserTokens(options?: TokenQueryOptionsV2): Promise<PaginatedResponse<WalletTokenV2>> {
+        return this.makePaginatedRequest<WalletTokenV2>('/tokens', options);
     }
 
-    async getUserTwitter(): Promise<OAuthCredential | null> {
-        return this.makeAuthenticatedRequest<OAuthCredential | null>('/twitter');
+    async getUserTwitter(): Promise<TwitterInfoV2 | null> {
+        const response = await this.makeAuthenticatedRequest<{ twitter: TwitterInfoV2 | null }>('/twitter');
+        return response.twitter;
     }
 
-    async getUserDiscord(): Promise<OAuthCredential | null> {
-        return this.makeAuthenticatedRequest<OAuthCredential | null>('/discord');
+    async getUserDiscord(): Promise<DiscordInfoV2 | null> {
+        const response = await this.makeAuthenticatedRequest<{ discord: DiscordInfoV2 | null }>('/discord');
+        return response.discord;
     }
 
-    async getUserTelegram(): Promise<OAuthCredential | null> {
-        return this.makeAuthenticatedRequest<OAuthCredential | null>('/telegram');
+    async getUserTelegram(): Promise<TelegramInfoV2 | null> {
+        const response = await this.makeAuthenticatedRequest<{ telegram: TelegramInfoV2 | null }>('/telegram');
+        return response.telegram;
     }
 
-    async getUserSocial(platform: 'twitter' | 'discord' | 'telegram'): Promise<OAuthCredential | null> {
-        return this.makeAuthenticatedRequest<OAuthCredential | null>(`/${platform}`);
+    async getUserSocial(platform: 'twitter' | 'discord' | 'telegram'): Promise<TwitterInfoV2 | DiscordInfoV2 | TelegramInfoV2 | null> {
+        const response = await this.makeAuthenticatedRequest<any>(`/${platform}`);
+        if (response && response[platform]) {
+            return response[platform] as TwitterInfoV2 | DiscordInfoV2 | TelegramInfoV2 | null;
+        }
+        return null;
     }
 
-    async getUserDomains(): Promise<DomainResponse> {
-        return this.makeAuthenticatedRequest<DomainResponse>('/domains');
+    async getUserDomains(options?: DomainQueryOptionsV2): Promise<PaginatedResponse<DomainNameV2>> {
+        return this.makePaginatedRequest<DomainNameV2>('/domains', options);
     }
 
-    async getUserEmail(): Promise<EmailResponse> {
-        return this.makeAuthenticatedRequest<EmailResponse>('/email');
+    async getUserEmail(): Promise<EmailResponse | null> {
+        const response = await this.makeAuthenticatedRequest<{ email: string | null }>('/email');
+        return response;
+    }
+
+    async getUserRoles(): Promise<UserRoleV2[] | null> {
+        const response = await this.makeAuthenticatedRequest<{ roles: UserRoleV2[] | null }>('/roles');
+        return response.roles;
     }
 
     private async makeAuthenticatedRequest<T>(path: string): Promise<T> {

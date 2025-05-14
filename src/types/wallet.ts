@@ -12,16 +12,43 @@ export enum WalletStatus {
 
 export interface UserWallet {
     id: string;
-    index: number;
     networkSymbol: NetworkSymbol;
-    createdDate: string;
-    updatedDate: string;
     status: WalletStatus;
-    isSearchSynced: boolean;
+
+}
+
+export interface TokenDetails {
+    id: string;
+    name: string;
+    symbol: string;
+    networkSymbol: NetworkSymbol;
 }
 
 export interface WalletToken {
     walletId: string;
-    tokenId: string | null;
-    amount: number;
+    token: TokenDetails;
+    tokenId: string;
+    totalAmount: number;
+}
+
+export interface UserWalletV2 {
+    id: string; // wallet address
+    networkSymbol: string; // TODO: this should be chain type (SOL BTC ETH)
+    chains: { 
+        //TODO: add chains. can be an array of strings.
+    }
+}
+
+export interface TokenInfoV2 {
+    networkSymbol: string;
+    // name?: string; // Example: if token name is available
+    // symbol?: string; // Example: if token symbol is available
+    // decimals?: number; // Example: if token decimals are available
+}
+
+export interface WalletTokenV2 {
+    totalAmount: string; // API dump: "string (representing a number)"
+    walletId: string; // wallet address
+    tokenId: string; // token mint address / ID
+    token: TokenInfoV2;
 } 

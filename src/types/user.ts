@@ -1,3 +1,5 @@
+import { NFTV2 } from './nft';
+
 export interface UserProfile {
     id: string;
     username: string;
@@ -21,6 +23,7 @@ export interface UserProfileDetails {
     showTwitter: boolean | null;
     discord: string | null;
     pfp: string | null;
+    pfpNFT: NFTV2 | null;
     banner: string | null;
     bannerOffsetTop: number | null;
     bannerBorder: string | null;
