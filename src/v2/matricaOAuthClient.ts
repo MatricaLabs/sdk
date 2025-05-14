@@ -95,19 +95,19 @@ export class UserSession {
     }
 
     async getUserTwitter(): Promise<OAuthCredential | null> {
-        return this.makeAuthenticatedRequest<OAuthCredential>('/twitter');
+        return this.makeAuthenticatedRequest<OAuthCredential | null>('/twitter');
     }
 
     async getUserDiscord(): Promise<OAuthCredential | null> {
-        return this.makeAuthenticatedRequest<OAuthCredential>('/discord');
+        return this.makeAuthenticatedRequest<OAuthCredential | null>('/discord');
     }
 
     async getUserTelegram(): Promise<OAuthCredential | null> {
-        return this.makeAuthenticatedRequest<OAuthCredential>('/telegram');
+        return this.makeAuthenticatedRequest<OAuthCredential | null>('/telegram');
     }
 
     async getUserSocial(platform: 'twitter' | 'discord' | 'telegram'): Promise<OAuthCredential | null> {
-        return this.makeAuthenticatedRequest<OAuthCredential>(`/${platform}`);
+        return this.makeAuthenticatedRequest<OAuthCredential | null>(`/${platform}`);
     }
 
     async getUserDomains(): Promise<DomainResponse> {
@@ -161,13 +161,13 @@ export class MatricaOAuthClient {
         this.maxRetries = config.maxRetries || 3;
 
         // Update URL structure for v2 endpoints
-        const baseApiUrl = `https://api.matrica.io/oauth2/v2`;
+        const baseApiUrl = `https://api.matrica.io/oauth2`;
 
         this.baseUrls = {
-            frontend: `https://matrica.io/oauth2/v2`,
+            frontend: `https://matrica.io/oauth2`,
             auth: `${baseApiUrl}/authorize`,
             token: `${baseApiUrl}/token`,
-            user: `${baseApiUrl}/user`
+            user: `${baseApiUrl}/v2/user`
         };
     }
 

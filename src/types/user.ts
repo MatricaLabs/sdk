@@ -3,7 +3,7 @@ export interface UserProfile {
     username: string;
     isAdmin: boolean;
     registered: boolean;
-    profile: UserProfileDetails;
+    profile: UserProfileDetails | null;
     isSearchSynced: boolean;
     createdDate: string;
     updatedDate: string;

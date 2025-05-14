@@ -108,6 +108,43 @@ describe('MatricaOAuthClient', () => {
             await expect(session.getUserDiscord()).resolves.toBeTruthy();
             await expect(session.getUserTelegram()).resolves.toBeTruthy();
             await expect(session.getUserEmail()).resolves.toBeTruthy();
+            
+            // Test with null response
+            (global.fetch as jest.Mock).mockResolvedValue({
+                ok: true,
+                json: () => Promise.resolve(null)
+            });
+            
+            await expect(session.getUserTwitter()).resolves.toBeNull();
+            await expect(session.getUserDiscord()).resolves.toBeNull();
+            await expect(session.getUserTelegram()).resolves.toBeNull();
+        });
+
+        it('should handle profile response with null profile field', async () => {
+            const session = client.createSessionFromTokens({
+                access_token: 'test-token',
+                refresh_token: 'refresh-token',
+                token_type: 'Bearer',
+                expires_in: 3600
+            });
+
+            // Mock a UserProfile response with null profile
+            (global.fetch as jest.Mock).mockResolvedValueOnce({
+                ok: true,
+                json: () => Promise.resolve({
+                    id: 'test-id',
+                    username: 'test-user',
+                    isAdmin: false,
+                    registered: true,
+                    profile: null,
+                    isSearchSynced: true,
+                    createdDate: '2023-01-01',
+                    updatedDate: '2023-01-01'
+                })
+            });
+
+            const profile = await session.getUserProfile();
+            expect(profile.profile).toBeNull();
         });
     });
 

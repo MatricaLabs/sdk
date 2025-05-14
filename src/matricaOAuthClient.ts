@@ -97,19 +97,19 @@ export class UserSession {
     }
 
     async getUserTwitter(): Promise<OAuthCredential | null> {
-        return this.makeAuthenticatedRequest<OAuthCredential>('/twitter');
+        return this.makeAuthenticatedRequest<OAuthCredential | null>('/twitter');
     }
 
     async getUserDiscord(): Promise<OAuthCredential | null> {
-        return this.makeAuthenticatedRequest<OAuthCredential>('/discord');
+        return this.makeAuthenticatedRequest<OAuthCredential | null>('/discord');
     }
 
     async getUserTelegram(): Promise<OAuthCredential | null> {
-        return this.makeAuthenticatedRequest<OAuthCredential>('/telegram');
+        return this.makeAuthenticatedRequest<OAuthCredential | null>('/telegram');
     }
 
     async getUserSocial(platform: 'twitter' | 'discord' | 'telegram'): Promise<OAuthCredential | null> {
-        return this.makeAuthenticatedRequest<OAuthCredential>(`/${platform}`);
+        return this.makeAuthenticatedRequest<OAuthCredential | null>(`/${platform}`);
     }
 
     async getUserDomains(): Promise<DomainResponse> {
