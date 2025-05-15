@@ -67,6 +67,10 @@ export class UserSession {
         this.tokens = tokens;
     }
 
+    public getTokens(): TokenResponse | undefined {
+        return this.tokens;
+    }
+
     private _buildQueryString(options?: BaseQueryOptions | NFTQueryOptionsV2 | TokenQueryOptionsV2 | DomainQueryOptionsV2): string {
         if (!options) return '';
         const params = new URLSearchParams();
@@ -251,7 +255,7 @@ export class MatricaOAuthClient {
         const baseApiUrl = config.baseApiUrl || `https://api.matrica.io/oauth2`;
 
         this.baseUrls = {
-            frontend: `https://matrica.io/oauth2`,
+            frontend: config.frontend || `https://matrica.io/oauth2`,
             auth: `${baseApiUrl}/authorize`,
             token: `${baseApiUrl}/token`,
             user: `${baseApiUrl}/v2/user`
@@ -292,6 +296,8 @@ export class MatricaOAuthClient {
 
         let response: Response;
         try {
+            console.log(this.baseUrls.token)
+            console.log(params.toString())
             response = await this.fetchWithRetry(
                 this.baseUrls.token,
                 {
@@ -307,10 +313,21 @@ export class MatricaOAuthClient {
         }
 
         if (!response.ok) {
-            const errorData = await response.json();
+            let errorDescription = 'Failed to exchange code for tokens';
+            let errorCode = 'API_ERROR';
+            try {
+                const errorData = await response.json();
+                if (errorData) {
+                    errorDescription = errorData.error_description || errorDescription;
+                    errorCode = errorData.error || errorCode;
+                }
+            } catch (e) {
+                // Response might not be JSON or errorData is null
+                errorDescription = `Failed to exchange code for tokens. Status: ${response.status} ${response.statusText}`;
+            }
             throw new MatricaOAuthError(
-                errorData.error_description || 'Failed to exchange code for tokens',
-                errorData.error || 'API_ERROR'
+                errorDescription,
+                errorCode
             );
         }
 
