@@ -32,23 +32,22 @@ export interface WalletToken {
 }
 
 export interface UserWalletV2 {
-    id: string; // wallet address
-    networkSymbol: string; // TODO: this should be chain type (SOL BTC ETH)
-    chains: { 
-        //TODO: add chains. can be an array of strings.
-    }
+    id: string;
+    networkSymbol: string;
+    primaryWalletOn: string[];
+    activeChains: string[];
 }
 
 export interface TokenInfoV2 {
     networkSymbol: string;
-    // name?: string; // Example: if token name is available
-    // symbol?: string; // Example: if token symbol is available
-    // decimals?: number; // Example: if token decimals are available
+    name: string;
+    symbol: string;
+    id: string
 }
 
 export interface WalletTokenV2 {
-    totalAmount: string; // API dump: "string (representing a number)"
-    walletId: string; // wallet address
-    tokenId: string; // token mint address / ID
+    totalAmount: string;
+    walletId: string;
+    tokenId: string;
     token: TokenInfoV2;
 } 

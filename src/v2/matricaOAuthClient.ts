@@ -155,10 +155,6 @@ export class UserSession {
         return response.profile;
     }
 
-    async getDomains(): Promise<DomainNameV2[]> {
-        throw new Error('getDomains() without pagination is ambiguous for V2. Use getUserDomains(options) for paginated V2 domains.');
-    }
-
     async getUserWallets(): Promise<UserWalletV2[]> {
         const response = await this.makeAuthenticatedRequest<{ wallets: UserWalletV2[] | [] }>('/wallets');
         return response.wallets;
