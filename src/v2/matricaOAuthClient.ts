@@ -248,7 +248,7 @@ export class MatricaOAuthClient {
         this.maxRetries = config.maxRetries || 3;
 
         // Update URL structure for v2 endpoints
-        const baseApiUrl = `https://api.matrica.io/oauth2`;
+        const baseApiUrl = config.baseApiUrl || `https://api.matrica.io/oauth2`;
 
         this.baseUrls = {
             frontend: `https://matrica.io/oauth2`,

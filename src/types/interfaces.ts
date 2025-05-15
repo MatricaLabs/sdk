@@ -2,6 +2,7 @@ export interface MatricaOAuthConfig {
     clientId: string;
     redirectUri: string;
     clientSecret?: string;
+    baseApiUrl?: string;
     environment?: 'development' | 'staging' | 'production';
     timeout?: number;
     maxRetries?: number;
