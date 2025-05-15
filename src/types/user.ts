@@ -11,30 +11,22 @@ export interface UserProfile {
     updatedDate: string;
 }
 
-export interface UserProfileDetails {
+interface PfpNFTCollection {
     id: string;
     name: string;
+}
+
+interface PfpNFT {
+    id: string;
+    collection: PfpNFTCollection;
+}
+
+export interface UserProfileDetails {
+    name: string;
     vanityURL: string;
-    about: string | null;
-    website: string | null;
-    emailVerified: boolean;
-    twitter: string | null;
-    twitterExternalId: string | null;
-    showTwitter: boolean | null;
-    discord: string | null;
     pfp: string | null;
-    pfpNFT: NFTV2 | null;
+    pfpNFT: PfpNFT | null;
     banner: string | null;
-    bannerOffsetTop: number | null;
-    bannerBorder: string | null;
-    bannerNFTCount: number | null;
-    bannerLeft: string | null;
-    bannerMiddle: string | null;
-    bannerRight: string | null;
-    border: string | null;
-    showGraveyard: boolean | null;
-    createdDate: string;
-    updatedDate: string;
 }
 
 export interface EmailResponse {
