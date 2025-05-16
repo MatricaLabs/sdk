@@ -47,6 +47,8 @@ export interface TokenInfoV2 {
 
 export interface WalletTokenV2 {
     totalAmount: string;
+    stakedAmount: string;
+    amount: string;
     walletId: string;
     tokenId: string;
     token: TokenInfoV2;

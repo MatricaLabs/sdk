@@ -36,36 +36,12 @@ export interface NFTCollectionInfoV2 {
     name: string;
 }
 
-//TODO: get the final types from olen and finish this
-
-/*
-TODO: 
-
-{
-    "id": "3XrK2QTeG7zNGhJ1tjjNVpx4G2fKVuNRB9XzdxvnEzSg",
-    "name": "Faceless #70635",
-    "image": "https://arweave.net/BTuEmnmkzwZYzPV6DcVAdaujKwBgreiXXKd9a9BuNic?ext=png",
-    "collection": {
-      "id": "cdca7992-ffff-413a-a5fd-304e3e0cf130",
-      "name": "The Faceless",
-      "community": {
-        "id": "f52a7851-b5e5-4f71-b4b7-0a13050d9f4c",
-        "name": "Mummies"
-      }
-    },
-    "status": "HODLED",
-    "networkSymbol": "SOL",
-    "ownerId": "7XuK1RrVhDDvf3kBysA5w1u9wbE11DUY6fgZjwpkUz5q",
-    "isCompressed": true,
-    "inscriptionNumber": null
-  }
-*/
 export interface NFTV2 {
     id: string;
     name: string;
     image: string | null;
     status: string;
-    networkSymbol: string;
+    networkSymbol: string | null;
     isCompressed: boolean;
     inscriptionNumber: number | null;
     ownerId: string; // wallet address
