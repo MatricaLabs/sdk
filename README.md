@@ -10,43 +10,16 @@ A lightweight SDK for integrating Matrica authentication into your applications.
 npm install @matrica/oauth-sdk
 ```
 
-## Version 2.0 Support
+## Version 2.0
 
-Starting with version 2.0.0, this SDK supports both v1 and v2 of the Matrica OAuth API. The default exports are compatible with v1 for backward compatibility, while v2 endpoints can be accessed through the v2 namespace.
+Version 2.0.0 of this SDK implements v2 of the Matrica OAuth API. This version introduces significant improvements including pagination, better type safety, enhanced filtering, and improved developer experience.
 
-### Using v1 (Legacy)
+> If you're upgrading from v1, please refer to the [Migration Guide](./MIGRATION.md) for detailed instructions.
+
+## Quick Start
 
 ```typescript
-// Default imports use v1 for backward compatibility
 import { MatricaOAuthClient } from '@matrica/oauth-sdk';
-
-const client = new MatricaOAuthClient({
-    clientId: 'your-client-id',
-    clientSecret: process.env.CLIENT_SECRET,
-    redirectUri: 'http://localhost:3000/callback'
-});
-```
-
-### Using v2 (Recommended for new applications)
-
-```typescript
-// Use the v2 namespace for new applications
-import { v2 } from '@matrica/oauth-sdk';
-
-const client = new v2.MatricaOAuthClient({
-    clientId: 'your-client-id',
-    clientSecret: process.env.CLIENT_SECRET,
-    redirectUri: 'http://localhost:3000/callback'
-});
-```
-
-## Quick Start (v2)
-
-```typescript
-import { v2 } from '@matrica/oauth-sdk';
-
-// Pull the v2 client out of the namespace
-const { MatricaOAuthClient } = v2;
 
 const client = new MatricaOAuthClient({
     clientId: 'your-client-id',
@@ -68,7 +41,7 @@ app.get('/', async (req, res) => {
 ## Features
 
 - Easy-to-use OAuth 2.0 authentication flow
-- Zero dependencies
+- No external runtime dependencies beyond Node 18+ (uses built-in fetch)
 - Secure token handling
 
 ## Authorization Code Flow Explained
@@ -80,9 +53,7 @@ The most common way to authenticate users is through the OAuth 2.0 Authorization
 First, instantiate the client with your application's details. The `redirectUri` must match the one registered in your Matrica developer settings.
 
 ```typescript
-import { v2 } from '@matrica/oauth-sdk';
-
-const { MatricaOAuthClient } = v2;
+import { MatricaOAuthClient } from '@matrica/oauth-sdk';
 
 const client = new MatricaOAuthClient({
     clientId: 'your-client-id',
@@ -195,6 +166,38 @@ app.get('/dashboard', async (req, res) => {
     }
 });
 ```
+
+## Additional Session Helpers
+
+### Refreshing Access Tokens
+
+If you stored a refresh token for a confidential application you can refresh the session in-place:
+
+```typescript
+await userSession.refreshToken(); // returns the new TokenResponse and updates the session
+```
+
+### Fetching User Domains
+
+Retrieve users' `.sol`, `.eth`, or other on-chain domain names with pagination and filtering:
+
+```typescript
+const domains = await userSession.getUserDomains({ skip: 0, take: 20, networkSymbol: 'SOL' });
+console.log(domains.data);       // DomainName[]
+console.log(domains.pagination); // { count, skip, take }
+```
+
+### Generic Social Account Helper
+
+Instead of calling platform-specific helpers you can use a single method:
+
+```typescript
+const twitter  = await userSession.getUserSocial('twitter');
+const discord  = await userSession.getUserSocial('discord');
+const telegram = await userSession.getUserSocial('telegram');
+```
+
+`getUserTwitter`, `getUserDiscord`, and `getUserTelegram` remain available for convenience.
 
 ## Examples
 
