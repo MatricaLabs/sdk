@@ -1,16 +1,3 @@
-import { NFTV2 } from './nft';
-
-export interface UserProfile {
-    id: string;
-    username: string;
-    isAdmin: boolean;
-    registered: boolean;
-    profile: UserProfileDetails | null;
-    isSearchSynced: boolean;
-    createdDate: string;
-    updatedDate: string;
-}
-
 interface PfpNFTCollection {
     id: string;
     name: string;
@@ -29,6 +16,17 @@ export interface UserProfileDetails {
     banner: string | null;
 }
 
+export interface UserProfile {
+    id: string;
+    username: string;
+    isAdmin: boolean;
+    registered: boolean;
+    profile: UserProfileDetails | null;
+    isSearchSynced: boolean;
+    createdDate: string;
+    updatedDate: string;
+}
+
 export interface EmailResponse {
     email: string | null;
-} 
+}

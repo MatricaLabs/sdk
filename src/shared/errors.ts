@@ -17,4 +17,4 @@ export class MatricaAuthenticationError extends MatricaOAuthError {
 export default {
     MatricaOAuthError,
     MatricaAuthenticationError
-}; 
+};

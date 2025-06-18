@@ -1,46 +1,40 @@
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 import {
     MatricaOAuthConfig,
     TokenResponse,
     AuthUrlResponse,
     MatricaLogger
-} from '../types/interfaces';
+} from '../shared/types/interfaces';
 import {
     UserProfile,
     EmailResponse,
-    // UserProfileDetails, // Already part of UserProfile
-} from '../types/user';
+} from './types/user';
 import {
-    UserWalletV2, // Changed from UserWallet
-    WalletTokenV2, // Changed from WalletToken
-    // TokenInfoV2 // Part of WalletTokenV2
-} from '../types/wallet';
+    UserWalletV2,
+    WalletTokenV2,
+} from './types/wallet';
 import {
-    NFTV2, // Changed from NFT
-    // NFTCollectionInfoV2 // Part of NFTV2
-} from '../types/nft';
+    NFTV2,
+} from './types/nft';
 import {
-    // OAuthCredential, // Replaced by specific V2 social types
     TwitterInfoV2,
     DiscordInfoV2,
     TelegramInfoV2,
-} from '../types/social';
+} from './types/social';
 import {
-    DomainNameV2, // Changed from DomainName
-    // DomainResponse // Will be replaced by PaginatedResponse<DomainNameV2>
-    // OwnerWalletInfoV2 // Part of DomainNameV2
-} from '../types/domain';
-import { UserRoleV2 } from '../types/roles.v2';
+    DomainNameV2,
+} from './types/domain';
+import { UserRoleV2 } from './types/roles';
 import {
     PaginatedResponse,
     PaginationInfo,
     NFTQueryOptionsV2,
     TokenQueryOptionsV2,
     DomainQueryOptionsV2,
-    BaseQueryOptions, // For methods that might not have specific V2 options yet but are paginated
-} from '../types/common.v2';
-import { validateConfig } from '../utils/validation';
-import { MatricaOAuthError } from '../errors';
+    BaseQueryOptions,
+} from './types/common';
+import { validateConfig } from '../shared/utils/validation';
+import { MatricaOAuthError } from '../shared/errors';
 
 // Export the UserSession class for v2
 export class UserSession {
@@ -296,8 +290,6 @@ export class MatricaOAuthClient {
 
         let response: Response;
         try {
-            console.log(this.baseUrls.token)
-            console.log(params.toString())
             response = await this.fetchWithRetry(
                 this.baseUrls.token,
                 {

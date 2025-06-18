@@ -14,4 +14,4 @@ export function validateConfig(config: MatricaOAuthConfig): void {
     if (config.maxRetries && config.maxRetries < 0) {
         throw new MatricaOAuthError('maxRetries must be a positive number');
     }
-} 
+}

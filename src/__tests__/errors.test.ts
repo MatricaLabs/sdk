@@ -1,4 +1,4 @@
-import { MatricaOAuthError, MatricaAuthenticationError } from '../errors';
+import { MatricaOAuthError, MatricaAuthenticationError } from '../shared/errors';
 
 describe('Error Classes', () => {
     describe('MatricaOAuthError', () => {

@@ -31,4 +31,4 @@ export interface TokenQueryOptionsV2 extends BaseQueryOptions {
 export interface DomainQueryOptionsV2 extends BaseQueryOptions {
     extension?: string;
     networkSymbol?: string;
-} 
+}

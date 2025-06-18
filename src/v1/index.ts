@@ -1,4 +1,4 @@
-export { MatricaOAuthClient } from '../matricaOAuthClient';
-export * from '../types/';
-export * from '../errors';
-export * from '../utils/validation'; 
+export { MatricaOAuthClient, UserSession } from './matricaOAuthClient';
+export * from './types';
+export * from '../shared/errors';
+export * from '../shared/utils/validation'; 
