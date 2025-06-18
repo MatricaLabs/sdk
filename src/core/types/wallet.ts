@@ -1,22 +1,22 @@
-export interface UserWalletV2 {
+export interface UserWallet {
     id: string;
     networkSymbol: string;
     primaryWalletOn: string[];
     activeChains: string[];
 }
 
-export interface TokenInfoV2 {
+export interface TokenInfo {
     networkSymbol: string;
     name: string;
     symbol: string;
     id: string
 }
 
-export interface WalletTokenV2 {
+export interface WalletToken {
     totalAmount: string;
     stakedAmount: string;
     amount: string;
     walletId: string;
     tokenId: string;
-    token: TokenInfoV2;
+    token: TokenInfo;
 }

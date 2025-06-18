@@ -16,19 +16,19 @@ export interface BaseQueryOptions {
     sortDirection?: 'ASC' | 'DESC';
 }
 
-export interface NFTQueryOptionsV2 extends BaseQueryOptions {
+export interface NFTQueryOptions extends BaseQueryOptions {
     nftId?: string;
     collectionId?: string;
     networkSymbol?: string;
 }
 
-export interface TokenQueryOptionsV2 extends BaseQueryOptions {
+export interface TokenQueryOptions extends BaseQueryOptions {
     networkSymbol?: string;
     tokenIds?: string[];
     minBalance?: number;
 }
 
-export interface DomainQueryOptionsV2 extends BaseQueryOptions {
+export interface DomainQueryOptions extends BaseQueryOptions {
     extension?: string;
     networkSymbol?: string;
 }

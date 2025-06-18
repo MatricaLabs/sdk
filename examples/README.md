@@ -1,6 +1,6 @@
 # Matrica OAuth SDK – Examples
 
-This folder contains a single, fully-working **v2 Express example** showing the complete OAuth flow.
+This folder contains a single, fully-working **Express example** showing the complete OAuth flow.
 
 ## 📄 Example File
 
@@ -9,7 +9,6 @@ This folder contains a single, fully-working **v2 Express example** showing the 
   2. Exchanges the code for tokens in `/callback`.
   3. Shows how to fetch profile, wallets, socials and email.
 
-> Looking for v1?  The SDK still exports v1 for backward-compatibility, but we no longer maintain a separate v1 example here.
 
 ---
 

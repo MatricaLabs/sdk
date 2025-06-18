@@ -10,27 +10,27 @@ import {
     EmailResponse,
 } from './types/user';
 import {
-    UserWalletV2,
-    WalletTokenV2,
+    UserWallet,
+    WalletToken,
 } from './types/wallet';
 import {
-    NFTV2,
+    NFT,
 } from './types/nft';
 import {
-    TwitterInfoV2,
-    DiscordInfoV2,
-    TelegramInfoV2,
+    TwitterInfo,
+    DiscordInfo,
+    TelegramInfo,
 } from './types/social';
 import {
-    DomainNameV2,
+    DomainName,
 } from './types/domain';
-import { UserRoleV2 } from './types/roles';
+import { UserRole } from './types/roles';
 import {
     PaginatedResponse,
     PaginationInfo,
-    NFTQueryOptionsV2,
-    TokenQueryOptionsV2,
-    DomainQueryOptionsV2,
+    NFTQueryOptions,
+    TokenQueryOptions,
+    DomainQueryOptions,
     BaseQueryOptions,
 } from './types/common';
 import { validateConfig } from '../shared/utils/validation';
@@ -65,7 +65,7 @@ export class UserSession {
         return this.tokens;
     }
 
-    private _buildQueryString(options?: BaseQueryOptions | NFTQueryOptionsV2 | TokenQueryOptionsV2 | DomainQueryOptionsV2): string {
+    private _buildQueryString(options?: BaseQueryOptions | NFTQueryOptions | TokenQueryOptions | DomainQueryOptions): string {
         if (!options) return '';
         const params = new URLSearchParams();
         for (const [key, value] of Object.entries(options)) {
@@ -153,44 +153,44 @@ export class UserSession {
         return response.profile;
     }
 
-    async getUserWallets(): Promise<UserWalletV2[]> {
-        const response = await this.makeAuthenticatedRequest<{ wallets: UserWalletV2[] | [] }>('/wallets');
+    async getUserWallets(): Promise<UserWallet[]> {
+        const response = await this.makeAuthenticatedRequest<{ wallets: UserWallet[] | [] }>('/wallets');
         return response.wallets;
     }
 
-    async getUserNFTs(options?: NFTQueryOptionsV2): Promise<PaginatedResponse<NFTV2>> {
-        return this.makePaginatedRequest<NFTV2>('/nfts', options);
+    async getUserNFTs(options?: NFTQueryOptions): Promise<PaginatedResponse<NFT>> {
+        return this.makePaginatedRequest<NFT>('/nfts', options);
     }
 
-    async getUserTokens(options?: TokenQueryOptionsV2): Promise<PaginatedResponse<WalletTokenV2>> {
-        return this.makePaginatedRequest<WalletTokenV2>('/tokens', options);
+    async getUserTokens(options?: TokenQueryOptions): Promise<PaginatedResponse<WalletToken>> {
+        return this.makePaginatedRequest<WalletToken>('/tokens', options);
     }
 
-    async getUserTwitter(): Promise<TwitterInfoV2 | null> {
-        const response = await this.makeAuthenticatedRequest<{ twitter: TwitterInfoV2 | null }>('/twitter');
+    async getUserTwitter(): Promise<TwitterInfo | null> {
+        const response = await this.makeAuthenticatedRequest<{ twitter: TwitterInfo | null }>('/twitter');
         return response.twitter;
     }
 
-    async getUserDiscord(): Promise<DiscordInfoV2 | null> {
-        const response = await this.makeAuthenticatedRequest<{ discord: DiscordInfoV2 | null }>('/discord');
+    async getUserDiscord(): Promise<DiscordInfo | null> {
+        const response = await this.makeAuthenticatedRequest<{ discord: DiscordInfo | null }>('/discord');
         return response.discord;
     }
 
-    async getUserTelegram(): Promise<TelegramInfoV2 | null> {
-        const response = await this.makeAuthenticatedRequest<{ telegram: TelegramInfoV2 | null }>('/telegram');
+    async getUserTelegram(): Promise<TelegramInfo | null> {
+        const response = await this.makeAuthenticatedRequest<{ telegram: TelegramInfo | null }>('/telegram');
         return response.telegram;
     }
 
-    async getUserSocial(platform: 'twitter' | 'discord' | 'telegram'): Promise<TwitterInfoV2 | DiscordInfoV2 | TelegramInfoV2 | null> {
+    async getUserSocial(platform: 'twitter' | 'discord' | 'telegram'): Promise<TwitterInfo | DiscordInfo | TelegramInfo | null> {
         const response = await this.makeAuthenticatedRequest<any>(`/${platform}`);
         if (response && response[platform]) {
-            return response[platform] as TwitterInfoV2 | DiscordInfoV2 | TelegramInfoV2 | null;
+            return response[platform] as TwitterInfo | DiscordInfo | TelegramInfo | null;
         }
         return null;
     }
 
-    async getUserDomains(options?: DomainQueryOptionsV2): Promise<PaginatedResponse<DomainNameV2>> {
-        return this.makePaginatedRequest<DomainNameV2>('/domains', options);
+    async getUserDomains(options?: DomainQueryOptions): Promise<PaginatedResponse<DomainName>> {
+        return this.makePaginatedRequest<DomainName>('/domains', options);
     }
 
     async getUserEmail(): Promise<EmailResponse | null> {
@@ -198,8 +198,8 @@ export class UserSession {
         return response;
     }
 
-    async getUserRoles(): Promise<UserRoleV2[] | null> {
-        const response = await this.makeAuthenticatedRequest<{ roles: UserRoleV2[] | null }>('/roles');
+    async getUserRoles(): Promise<UserRole[] | null> {
+        const response = await this.makeAuthenticatedRequest<{ roles: UserRole[] | null }>('/roles');
         return response.roles;
     }
 

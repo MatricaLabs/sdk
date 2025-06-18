@@ -1,9 +1,9 @@
-export interface NFTCollectionInfoV2 {
+export interface NFTCollectionInfo {
     id: string;
     name: string;
 }
 
-export interface NFTV2 {
+export interface NFT {
     id: string;
     name: string;
     image: string | null;
@@ -12,5 +12,5 @@ export interface NFTV2 {
     isCompressed: boolean;
     inscriptionNumber: number | null;
     ownerId: string; // wallet address
-    collection: NFTCollectionInfoV2 | null;
+    collection: NFTCollectionInfo | null;
 }

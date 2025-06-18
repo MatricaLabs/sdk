@@ -1,11 +1,11 @@
-export interface OwnerWalletInfoV2 {
+export interface OwnerWalletInfo {
     id: string; // wallet address
     networkSymbol: string;
 }
 
-export interface DomainNameV2 {
+export interface DomainName {
     key: string; // domain key / full name
     name: string; // domain name part
     extension: string; // domain extension part
-    ownerWallet: OwnerWalletInfoV2;
+    ownerWallet: OwnerWalletInfo;
 }
