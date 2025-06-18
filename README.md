@@ -40,10 +40,13 @@ const client = new v2.MatricaOAuthClient({
 });
 ```
 
-## Quick Start
+## Quick Start (v2)
 
 ```typescript
-import { MatricaOAuthClient } from '@matrica/oauth-sdk';
+import { v2 } from '@matrica/oauth-sdk';
+
+// Pull the v2 client out of the namespace
+const { MatricaOAuthClient } = v2;
 
 const client = new MatricaOAuthClient({
     clientId: 'your-client-id',
@@ -52,8 +55,12 @@ const client = new MatricaOAuthClient({
 });
 
 app.get('/', async (req, res) => {
-  const redirectUrl = await client.getAuthorizationUrl('profile wallets nfts');
-  res.redirect(urlWithState);
+  const { url, codeVerifier } = await client.getAuthorizationUrl('profile wallets nfts');
+
+  // Store codeVerifier in the user session here if you plan to exchange the code later
+  // req.session.codeVerifier = codeVerifier;
+
+  res.redirect(url);
 });
 
 ```
@@ -73,7 +80,9 @@ The most common way to authenticate users is through the OAuth 2.0 Authorization
 First, instantiate the client with your application's details. The `redirectUri` must match the one registered in your Matrica developer settings.
 
 ```typescript
-import { MatricaOAuthClient } from '@matrica/oauth-sdk';
+import { v2 } from '@matrica/oauth-sdk';
+
+const { MatricaOAuthClient } = v2;
 
 const client = new MatricaOAuthClient({
     clientId: 'your-client-id',

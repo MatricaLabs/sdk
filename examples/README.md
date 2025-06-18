@@ -74,15 +74,8 @@ MATRICA_REDIRECT_URI=http://localhost:3000/callback
 SESSION_SECRET=your_session_secret_here
 ```
 
-### 2. Choose Your Framework
 
-| Framework | Example | Features |
-|-----------|---------|----------|
-| **Express.js** | `v2-express-basic.js` | Server-side rendering, sessions |
-| **Next.js** | `v2-nextjs-app.tsx` | React, App Router, TypeScript |
-| **Custom** | `v2-pagination.js` | Pagination patterns only |
-
-### 3. Install Dependencies
+### 2. Install Dependencies
 
 ```bash
 # For Express.js example
@@ -95,7 +88,7 @@ npm install @matrica/oauth-sdk
 npm install -D @types/express @types/express-session
 ```
 
-### 4. Run Examples
+### 3. Run Examples
 
 ```bash
 # Express.js example

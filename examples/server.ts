@@ -1,13 +1,32 @@
 import express from 'express';
-import { EmailResponse, MatricaOAuthClient, MatricaScope, OAuthCredential, UserProfile, UserWallet } from '../src';
 import dotenv from 'dotenv';
+
+// Pull v2 namespace from the local source (adjust if consuming the package from npm)
+import { v2 } from '../src';
+
+// Get the runtime client value
+const { MatricaOAuthClient } = v2;
+
+// Import types only (compile-time)
+import type {
+  UserProfile,
+  UserWalletV2,
+  TwitterInfoV2,
+  DiscordInfoV2,
+  TelegramInfoV2
+} from '../src/v2';
+
+// MatricaScope enum is re-exported through shared types, so import separately
+import { MatricaScope } from '../src/shared/types/enum';
+
+import type { EmailResponse } from '../src/shared/types/base/user';
 dotenv.config();
 
 const app = express();
 
 // Store for code verifiers and user sessions
 const codeVerifiers: Record<string, string> = {};
-const userSessions: Record<string, any> = {}; // in memory storage for sessions, should be replaced with a database
+const userSessions: Record<string, v2.UserSession> = {}; // in memory storage for sessions, should be replaced with a database
 
 const client = new MatricaOAuthClient({
     clientId: process.env.MATRICA_CLIENT_ID!,
@@ -74,10 +93,10 @@ app.get('/callback', async (req, res) => {
             return null;
         }) as [
             UserProfile | null,
-            UserWallet[] | null,
-            OAuthCredential | null,
-            OAuthCredential | null,
-            OAuthCredential | null,
+            UserWalletV2[] | null,
+            TwitterInfoV2 | null,
+            DiscordInfoV2 | null,
+            TelegramInfoV2 | null,
             EmailResponse | null
         ];
 
