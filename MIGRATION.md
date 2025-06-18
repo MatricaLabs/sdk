@@ -24,6 +24,7 @@ import { MatricaOAuthClient } from '@matrica/oauth-sdk';
 **v2 (New)**
 ```typescript
 import { v2 } from '@matrica/oauth-sdk';
+const { MatricaOAuthClient, UserSession } = v2;
 // or
 import { MatricaOAuthClient, UserSession } from '@matrica/oauth-sdk/v2';
 ```
@@ -50,12 +51,12 @@ const client = new v2.MatricaOAuthClient({
 
 ### 3. Method Signature Changes
 
-#### getUserNFTs()
+#### getNFTs()
 
 **v1**
 ```typescript
-// Simple array response, optional nftId filter
-const nfts: NFT[] = await session.getUserNFTs('optional-nft-id');
+// Simple array response
+const nfts: NFT[] = await session.getNFTs();
 ```
 
 **v2**
@@ -75,12 +76,12 @@ console.log(nfts.data); // NFTV2[]
 console.log(nfts.pagination); // { count: 150, skip: 0, take: 10 }
 ```
 
-#### getUserTokens()
+#### getWalletTokens()
 
 **v1**
 ```typescript
 // Simple array response
-const tokens: WalletToken[] = await session.getUserTokens();
+const tokens: WalletToken[] = await session.getWalletTokens();
 ```
 
 **v2**
@@ -95,12 +96,12 @@ const tokens: PaginatedResponse<WalletTokenV2> = await session.getUserTokens({
 });
 ```
 
-#### getUserDomains()
+#### getDomains()
 
 **v1**
 ```typescript
 // Returns DomainResponse wrapper
-const domains: DomainResponse = await session.getUserDomains();
+const domains: DomainResponse = await session.getDomains();
 console.log(domains.domains); // DomainName[]
 ```
 
@@ -120,10 +121,8 @@ console.log(domains.data); // DomainNameV2[]
 
 **v1**
 ```typescript
-// Generic OAuthCredential type
-const twitter: OAuthCredential | null = await session.getUserTwitter();
-const discord: OAuthCredential | null = await session.getUserDiscord();
-const telegram: OAuthCredential | null = await session.getUserTelegram();
+// Returns array of OAuthCredential objects
+const socials: OAuthCredential[] = await session.getSocials();
 ```
 
 **v2**
@@ -249,7 +248,7 @@ For each method that now returns paginated results, update your code:
 
 ```typescript
 // Before - NFTs
-const nfts = await session.getUserNFTs();
+const nfts = await session.getNFTs();
 nfts.forEach(nft => console.log(nft.name));
 
 // After - NFTs
@@ -271,7 +270,10 @@ Update your TypeScript types to use v2 types:
 import { NFT, WalletToken, UserWallet } from '@matrica/oauth-sdk';
 
 // After
-import { NFTV2, WalletTokenV2, UserWalletV2, PaginatedResponse } from '@matrica/oauth-sdk';
+import { v2 } from '@matrica/oauth-sdk';
+const { NFTV2, WalletTokenV2, UserWalletV2, PaginatedResponse } = v2;
+// or
+import { NFTV2, WalletTokenV2, UserWalletV2, PaginatedResponse } from '@matrica/oauth-sdk/v2';
 
 // Update function signatures
 function processNFTs(nfts: PaginatedResponse<NFTV2>) {
@@ -288,7 +290,7 @@ function processNFTs(nfts: PaginatedResponse<NFTV2>) {
 ```typescript
 // v1 Pattern
 async function getAllUserNFTs() {
-    const nfts = await session.getUserNFTs();
+    const nfts = await session.getNFTs();
     return nfts;
 }
 
@@ -323,7 +325,7 @@ async function getAllUserNFTsPaginated() {
 ```typescript
 // v1 Pattern - Filter after fetching
 async function getSolanaTokens() {
-    const tokens = await session.getUserTokens();
+    const tokens = await session.getWalletTokens();
     return tokens.filter(token => token.token.networkSymbol === 'SOL');
 }
 
