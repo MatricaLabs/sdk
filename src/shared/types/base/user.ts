@@ -9,6 +9,7 @@ interface PfpNFT {
 }
 
 export interface UserProfileDetails {
+    id: string;
     name: string;
     vanityURL: string;
     pfp: string | null;
